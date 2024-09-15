@@ -8,4 +8,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app 
+    environment:
+      - OPENAIKEY=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
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    
