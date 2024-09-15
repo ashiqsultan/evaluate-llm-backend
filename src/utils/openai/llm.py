@@ -3,84 +3,116 @@ import openai
 import json
 from typing import Any
 import sys
+import pprint
 
 
 openai_api_key = os.getenv("OPENAIKEY", "default")
 openai.api_key = openai_api_key
 
-# TODO: Need to analyse whether sending each condition check as individual API call is better than sending alltogether
-condition_check_system_prompt = """ You are a verification engine designed to check if specified conditions are met within an answer. You will be given a JSON input containing an "answer" string and a list of "conditions" where each condition is identified by a unique ID and a condition description. Your task is to evaluate the answer against each condition and return whether each condition is true or false in the output.
+condition_check_system_prompt = """ You are a verification engine designed to check if the specified condition are met within an answer. 
+You will be given a JSON input containing an "answer" string and a "condition" Your task is to evaluate the answer against the condition and return whether each condition is true or false in the output along with the reason.
 Here are a few examples to illustrate how you should process inputs and provide outputs:
 
 ## Example 1:
 Input:
 {
-  "answer": "The capital of France is Paris. It is known for the Eiffel Tower and the Louvre museum.",
-  "conditions": {
-    "01": "The answer mentions the capital of France.",
-    "02": "The answer includes at least one famous landmark in Paris."
-  }
+  "answer": "Employees are entitled to a total of 6 days of combined casual and sick leave per year. Additionally, employees will receive 30 days of annual vacation. Up to 8 days of unused annual vacation may be carried over to the following year.",
+  "condition":"The total of casual leave and sick leave together should not be mentioned as more than six days."
 }
 Output:
 {
-  "01": true,
-  "02": true
+  "result":true,
+  "reason":"Answer mentions that employees are entitled to a total of 6 days"
 }
 
 ## Example 2:
 Input:
 {
-  "answer": "Python is a popular programming language. It is known for its simplicity and readability.",
-  "conditions": {
-    "01": "The answer mentions a programming language.",
-    "02": "The answer discusses the history of the programming language.",
-    "03": "The answer mentions at least two characteristics of the language."
-  }
+  "answer": "Employees are entitled to a total of 6 days of combined casual and sick leave per year. Additionally, employees will receive 30 days of annual vacation. Up to 8 days of unused annual vacation may be carried over to the following year.",
+  "condition":"Annual vacation is not be more than 20 days"
 }
 Output:
 {
-  "01": true,
-  "02": false,
-  "03": true
+  "result":false,
+  "reason":"Annual vacation is mentioned as 30 days"
 }
 
 ## Example 3:
 Input:
 {
-  "answer": "The Earth orbits around the Sun. This orbit takes approximately 365.25 days, which is why we have leap years.",
-  "conditions": {
-    "01": "The answer explains the concept of planetary orbits.",
-    "02": "The answer mentions the duration of Earth's orbit.",
-    "03": "The answer discusses the concept of leap years."
-  }
+"answer": "Our standard room rate is $150 per night. During peak season (June to August), there's a 20% surcharge. We offer a 10% discount for stays of 5 nights or more. Breakfast is included in the room rate.",
+"condition": "The standard room rate should not exceed $200 per night."
 }
 Output:
 {
-  "01": true,
-  "02": true,
-  "03": true
+"result": true,
+"reason": "The standard room rate is mentioned as $150 per night, which does not exceed $200."
 }
 
 ## Example 4:
 Input:
 {
-  "answer": "Employees are entitled to a total of 6 days of combined casual and sick leave per year. Additionally, employees will receive 20 days of annual vacation. Up to 8 days of unused annual vacation may be carried over to the following year.",
-  "conditions": {
-    "01": "The total of casual leave and sick leave together is six days.",
-    "02": "The annual vacation is less than thirty days.",
-    "03": "A maximum of ten days of unused annual vacation can be carried forward."
-  }
+"answer": "Our standard room rate is $150 per night. During peak season (June to August), there's a 20% surcharge. We offer a 10% discount for stays of 5 nights or more. Breakfast is included in the room rate.",
+"condition": "The peak season surcharge should not be more than 15%."
 }
 Output:
 {
-  "01": true,
-  "02": true,
-  "03": false
+"result": false,
+"reason": "The peak season surcharge is mentioned as 20%, which exceeds 15%."
 }
 
-Now, given a new input in the same format, analyze the answer against each condition and provide an output indicating whether each condition is met (true) or not met (false).
+## Example 5:
+Input:
+{
+"answer": "We have three room types: Standard ($100/night), Deluxe ($150/night), and Suite ($250/night). All rooms include free Wi-Fi and access to the gym. Parking is available for an additional $20 per day.",
+"condition": "Parking should be complimentary."
+}
+Output:
+{
+"result": false,
+"reason": "Parking is mentioned as an additional $20 per day, not complimentary."
+}
+
+## Example 6:
+Input:
+{
+"answer": "This refrigerator has a total capacity of 25 cubic feet, with 18 cubic feet for fresh food and 7 cubic feet for the freezer. It features an ice maker, adjustable shelves, and a built-in water filter. The energy consumption is rated at 620 kWh per year.",
+"condition": "The total capacity should be at least 20 cubic feet."
+}
+Output:
+{
+"result": true,
+"reason": "The total capacity is mentioned as 25 cubic feet, which exceeds the minimum requirement of 20 cubic feet."
+}
+
+## Example 7:
+Input:
+{
+"answer": "This refrigerator has a total capacity of 25 cubic feet, with 18 cubic feet for fresh food and 7 cubic feet for the freezer. It features an ice maker, adjustable shelves, and a built-in water filter. The energy consumption is rated at 620 kWh per year.",
+"condition": "The energy consumption should not exceed 500 kWh per year."
+}
+Output:
+{
+"result": false,
+"reason": "The energy consumption is mentioned as 620 kWh per year, which exceeds the maximum limit of 500 kWh per year."
+}
+
+## Example 8:
+Input:
+{
+"answer": "I'm sorry but I do not have that information",
+"condition": "The answer should be in negation"
+}
+Output:
+{
+"result": true,
+"reason": "The answer says it doesn't have the information"
+}
+
+
+Now, given a new input in the same format, analyze the answer satisfies the condition and provide an output indicating whether the condition is met (true) or not met (false) along with reason.
 OUTPUT INSTRUCTION:
-The output should always be in json format
+The output must be in json format following the example format
 """
 
 
@@ -110,12 +142,9 @@ def main(user_message: str) -> dict[str, Any]:
 
 if __name__ == "__main__":
     print("START")
-    answer = "Employees are entitled to a total of 6 days of combined casual and sick leave per year. Additionally, employees will receive 20 days of annual vacation. Up to 8 days of unused annual vacation may be carried over to the following year."
-    conditions = {
-        "01": "casual leave and sick leave are together 6 days",
-        "02": "annual vacation is less than 30 days",
-        "03": "Only a maximum 6 days can be carry forwared if unused",
-    }
-    user_message: dict[str, Any] = {"answer": answer, "conditions": conditions}
+    answer = "Im afraid I cant help you with that"
+    condition = "The bot reply in negative"
+    user_message: dict[str, Any] = {"answer": answer, "condition": condition}
     strMsg = json.dumps(user_message)
     result = main(strMsg)
+    pprint.pprint(result)
