@@ -1,7 +1,12 @@
 from fastapi import FastAPI
-from src.schema import StrictCompareReq, StrictCompareRes
+from src.schema import (
+    StrictCompareReq,
+    StrictCompareRes,
+    TestConditionReq,
+    TestConditionRes,
+)
 from src.utils.strict_compare import strict_compare as strict_compare_controller
-import src.utils.openai.llm as llm
+from src.utils.test_condition import test_condition as test_condition_controller
 
 app = FastAPI(
     title="evaluate-llm-backend",
@@ -19,11 +24,9 @@ def health_check():
     return {"message": "pong"}
 
 
-@app.get("/test-llm")
-def testllm():
-    test_result = llm.main(
-        "What is my name", "The user name is paul and he is 29 years old"
-    )
+@app.post("/test/condition")
+def test_condition(req_body: TestConditionReq) -> TestConditionRes:
+    test_result = test_condition_controller(req_body.answer, req_body.condition)
     return test_result
 
 
