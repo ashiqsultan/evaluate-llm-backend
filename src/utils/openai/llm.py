@@ -9,7 +9,7 @@ import pprint
 openai_api_key = os.getenv("OPENAIKEY", "default")
 openai.api_key = openai_api_key
 
-condition_check_system_prompt = """ You are a verification engine designed to check if the specified condition are met within an answer. 
+condition_check_system_prompt = """ You are a verification engine designed to check if the specified condition is met within an answer. 
 You will be given a JSON input containing an "answer" string and a "condition" Your task is to evaluate the answer against the condition and return whether each condition is true or false in the output along with the reason.
 Here are a few examples to illustrate how you should process inputs and provide outputs:
 
@@ -101,7 +101,7 @@ Output:
 Input:
 {
 "answer": "I'm sorry but I do not have that information",
-"condition": "The answer should be in negation"
+"condition": "The bot should not provide answer"
 }
 Output:
 {
