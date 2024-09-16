@@ -1,15 +1,4 @@
-import os
-import openai
-import json
-from typing import Any
-import sys
-import pprint
-
-
-openai_api_key = os.getenv("OPENAIKEY", "default")
-openai.api_key = openai_api_key
-
-condition_check_system_prompt = """ You are a verification engine designed to check if the specified condition is met within an answer. 
+system_prompt = """ You are a verification engine designed to check if the specified condition is met within an answer. 
 You will be given a JSON input containing an "answer" string and a "condition" Your task is to evaluate the answer against the condition and return whether each condition is true or false in the output along with the reason.
 Here are a few examples to illustrate how you should process inputs and provide outputs:
 
@@ -114,37 +103,3 @@ Now, given a new input in the same format, analyze the answer satisfies the cond
 OUTPUT INSTRUCTION:
 The output must be in json format following the example format
 """
-
-
-def main(user_message: str) -> dict[str, Any]:
-    try:
-        response = openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": condition_check_system_prompt},
-                {"role": "user", "content": user_message},
-            ],
-        )
-        response_content = response.choices[0].message.content
-        if isinstance(response_content, str):
-            try:
-                output_json = json.loads(response_content)
-                return output_json
-            except json.JSONDecodeError:
-                raise Exception(
-                    "response message content from llm is a string but not valid JSON"
-                )
-        raise ValueError("response message content from llm is not a string")
-    except Exception as e:
-        print(e, file=sys.stderr)
-        return {"error": "Error with OpenAI LLM API"}
-
-
-if __name__ == "__main__":
-    print("START")
-    answer = "Im afraid I cant help you with that"
-    condition = "The bot reply in negative"
-    user_message: dict[str, Any] = {"answer": answer, "condition": condition}
-    strMsg = json.dumps(user_message)
-    result = main(strMsg)
-    pprint.pprint(result)
