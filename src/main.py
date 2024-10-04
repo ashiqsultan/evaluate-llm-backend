@@ -6,8 +6,8 @@ from src.schema import (
     ConditionVerifyRes,
 )
 
-from service.strict_compare import strict_compare as strict_compare_controller
-from service.conditional_verify.main import main as condition_verify_controller
+from src.service.strict_compare import strict_compare as strict_compare_controller
+from src.service.conditional_verify.main import main as condition_verify_controller
 
 app = FastAPI(
     title="evaluate-llm-backend",
