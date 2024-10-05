@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from src.schema import (
     ReqConditionEval,
-    StrictCompareReq,
+    ReqStrictCompare,
     ResConditionEval,
-    StrictCompareRes,
+    ResStrictCompare,
 )
 from src.service.strict_compare import strict_compare as strict_compare_service
 from src.service.condition_eval import main as condition_eval_service
@@ -21,10 +21,10 @@ def condition_evaluation(req_body: ReqConditionEval) -> ResConditionEval:
 
 
 @router.post("/evaluate/strict-compare")
-def strict_compare(request: StrictCompareReq) -> StrictCompareRes:
+def strict_compare(request: ReqStrictCompare) -> ResStrictCompare:
     """
     Strict Compare two strings and return true or false
     """
-    return StrictCompareRes(
+    return ResStrictCompare(
         result=strict_compare_service(request.expected, request.actual)
     )

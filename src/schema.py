@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 
 
-class StrictCompareReq(BaseModel):
+class ReqStrictCompare(BaseModel):
     expected: str
     actual: str
 
 
-class StrictCompareRes(BaseModel):
+class ResStrictCompare(BaseModel):
     result: bool
 
 
