@@ -4,7 +4,7 @@ import json
 from typing import Any
 import sys
 import pprint
-from src.service.conditional_verify.system_prompt import system_prompt
+from .system_prompt import system_prompt
 
 openai_api_key = os.getenv("OPENAIKEY", "default")
 openai.api_key = openai_api_key

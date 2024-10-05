@@ -1,4 +1,4 @@
-from src.service.conditional_verify.llm import llm
+from .llm import llm
 from src.schema import ConditionVerifyRes
 import json
 
