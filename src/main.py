@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from src.routers import health, verify
+from routers import evaluate
+from src.routers import health
 
 app = FastAPI(
     title="evaluate-llm-backend",
@@ -9,4 +10,4 @@ app = FastAPI(
 )
 
 app.include_router(health.router)
-app.include_router(verify.router)
+app.include_router(evaluate.router)

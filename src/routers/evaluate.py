@@ -6,7 +6,7 @@ from src.schema import (
     StrictCompareRes,
 )
 from src.service.strict_compare import strict_compare as strict_compare_service
-from src.service.conditional_verify import main as condition_verify_service
+from src.service.condition_eval import main as condition_eval_service
 
 router = APIRouter()
 
@@ -16,12 +16,15 @@ def condition_evaluation(req_body: ReqConditionEval) -> ResConditionEval:
     """
     Verifies whether an answer satisfies a given condition.
     """
-    test_result = condition_verify_service(req_body.answer, req_body.condition)
+    test_result = condition_eval_service(req_body.answer, req_body.condition)
     return test_result
 
 
 @router.post("/evaluate/strict-compare")
 def strict_compare(request: StrictCompareReq) -> StrictCompareRes:
+    """
+    Strict Compare two strings and return true or false
+    """
     return StrictCompareRes(
         result=strict_compare_service(request.expected, request.actual)
     )
