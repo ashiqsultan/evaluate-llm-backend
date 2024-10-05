@@ -10,11 +10,11 @@ class StrictCompareRes(BaseModel):
     result: bool
 
 
-class ConditionVerifyReq(BaseModel):
+class ReqConditionEval(BaseModel):
     answer: str
     condition: str
 
 
-class ConditionVerifyRes(BaseModel):
+class ResConditionEval(BaseModel):
     result: bool
     reason: str

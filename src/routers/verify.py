@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from src.schema import (
-    ConditionVerifyReq,
+    ReqConditionEval,
     StrictCompareReq,
-    ConditionVerifyRes,
+    ResConditionEval,
     StrictCompareRes,
 )
 from src.service.strict_compare import strict_compare as strict_compare_service
@@ -11,8 +11,8 @@ from src.service.conditional_verify import main as condition_verify_service
 router = APIRouter()
 
 
-@router.post("/verify/conditional")
-def verify_condition(req_body: ConditionVerifyReq) -> ConditionVerifyRes:
+@router.post("/evaluate/condition")
+def condition_evaluation(req_body: ReqConditionEval) -> ResConditionEval:
     """
     Verifies whether an answer satisfies a given condition.
     """
@@ -20,7 +20,7 @@ def verify_condition(req_body: ConditionVerifyReq) -> ConditionVerifyRes:
     return test_result
 
 
-@router.post("/verify/strict-compare")
+@router.post("/evaluate/strict-compare")
 def strict_compare(request: StrictCompareReq) -> StrictCompareRes:
     return StrictCompareRes(
         result=strict_compare_service(request.expected, request.actual)
