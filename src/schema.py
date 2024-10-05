@@ -18,3 +18,12 @@ class ReqConditionEval(BaseModel):
 class ResConditionEval(BaseModel):
     result: bool
     reason: str
+
+
+class ReqSimilarity(BaseModel):
+    expected: str
+    actual: str
+
+
+class ResSimilarity(BaseModel):
+    score: float

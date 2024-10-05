@@ -4,9 +4,12 @@ from src.schema import (
     ReqStrictCompare,
     ResConditionEval,
     ResStrictCompare,
+    ReqSimilarity,
+    ResSimilarity,
 )
 from src.service.strict_compare import strict_compare as strict_compare_service
 from src.service.condition_eval import main as condition_eval_service
+from src.service.similarity import check_similarity
 
 router = APIRouter()
 
@@ -18,6 +21,15 @@ def condition_evaluation(req_body: ReqConditionEval) -> ResConditionEval:
     """
     test_result = condition_eval_service(req_body.answer, req_body.condition)
     return test_result
+
+
+@router.post("/evaluate/similarity")
+def similarity_evaluation(req_body: ReqSimilarity) -> ResSimilarity:
+    """
+    Gives the similarity of two strings using SBERT cosine similarity
+    """
+    test_result = check_similarity(req_body.expected, req_body.actual)
+    return ResSimilarity(score=test_result)
 
 
 @router.post("/evaluate/strict-compare")
